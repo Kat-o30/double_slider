@@ -1,0 +1,109 @@
+import React, { useState } from 'react';
+import firebase from '../firebase';
+import { Link } from 'react-router-dom';
+import './Signin.css';
+
+function Signin() {
+
+  const [mobile, setMobile] = useState('');
+  const [otp, setOtp] = useState('');
+  const [showOtpForm, setShowOtpForm] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'mobile') {
+      setMobile(value);
+    } else if (name === 'otp') {
+      setOtp(value);
+    }
+  };
+
+  const configureCaptcha = () => {
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sign-in-button', {
+      size: 'invisible',
+      callback: (response) => {
+        onSignInSubmit();
+        console.log('Recaptcha verified');
+      },
+      defaultCountry: 'IN',
+    });
+  };
+
+  const onSignInSubmit = (e) => {
+    e.preventDefault();
+    configureCaptcha();
+    const phoneNumber = '+91' + mobile;
+    console.log(phoneNumber);
+    const appVerifier = window.recaptchaVerifier;
+
+    firebase
+      .auth()
+      .signInWithPhoneNumber(phoneNumber, appVerifier)
+      .then((confirmationResult) => {
+        window.confirmationResult = confirmationResult;
+        console.log('OTP has been sent');
+        setShowOtpForm(true);
+      })
+      .catch((error) => {
+        console.log('SMS not sent');
+      });
+  };
+
+  const onSubmitOTP = (e) => {
+    e.preventDefault();
+    const code = otp;
+    console.log(code);
+    window.confirmationResult  
+      .confirm(code)
+      .then((result) => {
+        const user = result.user;
+        console.log(JSON.stringify(user));
+        alert('User is verified');
+        setOtp('');
+        setShowOtpForm(false);
+      })
+      .catch((error) => {
+        // Handle error
+      });
+  };
+
+  return (
+    <>
+      <div className='signin_background'>
+        <h2>Login Form</h2>
+        <form action="" onSubmit={onSignInSubmit}>
+          <div id="sign-in-button"></div>
+          <input
+            type="number"
+            name="mobile"
+            placeholder="Phone Number"
+            required
+            onChange={handleChange}
+            value={mobile}
+          />
+          <button type="submit">Submit</button>
+          <Link to="/signup" className='btn btn-default border w-100 bg-light rounded-0 text-decoration-none'><strong>Create Account</strong></Link>
+        </form>
+
+        {showOtpForm && (
+          <div>
+            <h2>Enter OTP</h2>
+            <form action="" onSubmit={onSubmitOTP}>
+              <input
+                type="number"
+                name="otp"
+                placeholder="OTP Number"
+                required
+                onChange={handleChange}
+                value={otp}
+              />
+              <button id="signUp" type="submit">Submit</button>
+            </form>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+export default Signin

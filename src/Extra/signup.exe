@@ -1,0 +1,55 @@
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom';
+import Validation from './SignupValidation';
+import './Signup.css';
+
+function Signup() {
+  const [values, setValues] = useState({
+    number: '',
+    email: '',
+    password: ''
+  })
+  const [errors, setErrors] = useState({})
+  const handleInput = (event) => {
+    setValues(prev => ({ ...prev, [event.target.name]: [event.target.value] }))
+  }
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    setErrors(Validation(values));
+  }
+  return (
+    <div className='signup_background'>
+      <div className='p-3 rounded-25 custom-container'>
+        <form onSubmit={handleSubmit}>
+          <h1>Sign up</h1>
+          <h1>Welcome to your portal</h1>
+          <h2>Enter your details</h2>
+
+          <div className='mb-3 input-box'>
+            <label htmlFor="contact"><strong>Contact Number</strong></label>
+            <input type="number" onChange={handleInput} placeholder='Enter Contact number' name='number' className="form-control rounded-0" />
+            {errors.number && <span className='text-danger'> {errors.number} </span>}
+          </div>
+
+          <div className='mb-3 input-box'>
+            <label htmlFor="email"><strong>Email</strong></label>
+            <input type="email" onChange={handleInput} placeholder='Enter Email' name='email' className="form-control rounded-0" />
+            {errors.email && <span className='text-danger'> {errors.email} </span>}
+          </div>
+
+          <div className='mb-3 input-box'>
+            <label htmlFor="password"><strong>Password</strong></label>
+            <input type="password" onChange={handleInput} placeholder='Enter Password' name='password' className="form-control rounded-0" />
+            {errors.password && <span className='text-danger'> {errors.password} </span>}
+          </div>
+          <div className="buttons">
+            <button type='submit' className='btn btn-success rounded-0'><strong>Signup</strong></button>
+            <Link to="/" className='btn btn-default border my-3 bg-light rounded-0 text-decoration-none button-link'><strong>Login</strong></Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default Signup
